@@ -221,12 +221,13 @@ export async function POST(request) {
     // Validate input
     console.log("🔧 Validating input...");
     const body = await request.json();
+    console.log("📋 Raw request body:", body);
+    
     const validated = updateFeeSchema.parse(body);
     console.log("✅ Input validated:", validated);
 
     // Execute handler with user context
     const mockRequest = {
-      ...request,
       user: {
         uid: decodedToken.uid,
         email: decodedToken.email,
@@ -239,6 +240,7 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('❌ Update student fee API error:', error);
+    console.error('❌ Error stack:', error.stack);
     
     if (error.name === 'ZodError') {
       console.error("❌ Validation error:", error.errors);
@@ -278,7 +280,8 @@ export async function POST(request) {
       JSON.stringify({ 
         error: 'Internal server error', 
         details: error.message,
-        code: 'server-error'
+        name: error.name,
+        code: error.code
       }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
